@@ -77,7 +77,7 @@ def depthFirstSearch(problem: SearchProblem):
 
         if estado not in nodos_visitados:  
             nodos_visitados.append(estado)  # aqui lo marco como visitado
-            for sucesor, accion, costo_del_camino in problem.getSuccessors(estado):
+            for sucesor, accion, costo_del_paso in problem.getSuccessors(estado):
                 if sucesor not in nodos_visitados:  
                     mi_frontera.push((sucesor, camino + [accion]))  # aqui lo agrego a la pila
                     
@@ -145,22 +145,22 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     mi_frontera = utils.PriorityQueue()
     nodos_visitados = set()
 
-    estadoInicial = problem.getStartState()
-    mi_frontera.push((estadoInicial, [], 0), heuristic(estadoInicial, problem))
+    estado_inicial = problem.getStartState()
+    mi_frontera.push((estado_inicial, [], 0), heuristic(estado_inicial, problem))
 
     while not mi_frontera.isEmpty():
-        estado, camino, costoAcumulado = mi_frontera.pop()
+        estado, camino, costo_acumulado = mi_frontera.pop()
 
         if problem.isGoalState(estado):
             return camino
 
         if estado not in nodos_visitados:
             nodos_visitados.add(estado)
-            for sucesor, accion, costoPaso in problem.getSuccessors(estado):
+            for sucesor, accion, costo_del_paso in problem.getSuccessors(estado):
                 if sucesor not in nodos_visitados:
-                    nuevoCosto = costoAcumulado + costoPaso
-                    prioridad = nuevoCosto + heuristic(sucesor, problem)
-                    mi_frontera.push((sucesor, camino + [accion], nuevoCosto), prioridad)
+                    nuevo_costo = costo_acumulado + costo_del_paso
+                    prioridad = nuevo_costo + heuristic(sucesor, problem)
+                    mi_frontera.push((sucesor, camino + [accion], nuevo_costo), prioridad)
     
 
     return []
