@@ -5,7 +5,7 @@ from algorithms.problems import SystemRepairProblem
 from world.game import Directions, Actions
 
 
-def nullHeuristic(state, problem=None):
+def nullHeuristic(estado, problema=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
     goal in the provided SearchProblem.  This heuristic is trivial.
@@ -13,7 +13,7 @@ def nullHeuristic(state, problem=None):
     return 0
 
 
-def manhattanHeuristic(state, problem):
+def manhattanHeuristic(estado, problema):
     """
     The Manhattan distance heuristic.
 
@@ -23,22 +23,22 @@ def manhattanHeuristic(state, problem):
     - the nearest pending T if the robot has the kit and systems remain.
     - C if all systems have been repaired.
     """
-    position, hasKit, pendingSystems = state
+    posicion, tieneKit, sistemasPendientes = estado
 
-    if not hasKit:
-        objetivo = problem.kitPosition
-    elif len(pendingSystems) > 0:
+    if not tieneKit:
+        objetivo = problema.kitPosition
+    elif len(sistemasPendientes) > 0:
         objetivo = min(
-            pendingSystems,
-            key=lambda t: abs(position[0] - t[0]) + abs(position[1] - t[1]),
+            sistemasPendientes,
+            key=lambda sistema: abs(posicion[0] - sistema[0]) + abs(posicion[1] - sistema[1]),
         )
     else:
-        objetivo = problem.controlPosition
+        objetivo = problema.controlPosition
 
-    return abs(position[0] - objetivo[0]) + abs(position[1] - objetivo[1])
+    return abs(posicion[0] - objetivo[0]) + abs(posicion[1] - objetivo[1])
 
 
-def euclideanHeuristic(state, problem):
+def euclideanHeuristic(estado, problema):
     """
     The Euclidean distance heuristic.
 
@@ -48,59 +48,24 @@ def euclideanHeuristic(state, problem):
     - the nearest pending T if the robot has the kit and systems remain.
     - C if all systems have been repaired.
     """
-    position, hasKit, pendingSystems = state
+    posicion, tieneKit, sistemasPendientes = estado
 
-    def distanciaEuclidea(a, b):
-        return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+    def distanciaEuclidea(punto1, punto2):
+        return math.sqrt((punto1[0] - punto2[0]) ** 2 + (punto1[1] - punto2[1]) ** 2)
 
-    if not hasKit:
-        objetivo = problem.kitPosition
-    elif len(pendingSystems) > 0:
-        objetivo = min(pendingSystems, key=lambda t: distanciaEuclidea(position, t))
+    if not tieneKit:
+        objetivo = problema.kitPosition
+    elif len(sistemasPendientes) > 0:
+        objetivo = min(sistemasPendientes, key=lambda sistema: distanciaEuclidea(posicion, sistema))
     else:
-        objetivo = problem.controlPosition
+        objetivo = problema.controlPosition
 
-    return distanciaEuclidea(position, objetivo)
-
-
-def _bfsDistance(inicio, meta, walls):
-    """
-    Calcula la distancia real (en pasos) entre 'inicio' y 'meta' recorriendo
-    el mapa con BFS y respetando las paredes (walls). Es la distancia real
-    del laberinto, no una estimación en línea recta.
-    """
-    if inicio == meta:
-        return 0
-
-    frontera = utils.Queue()
-    visitados = {inicio}
-    frontera.push((inicio, 0))
-
-    while not frontera.isEmpty():
-        (x, y), distancia = frontera.pop()
-
-        for direction in [
-            Directions.NORTH,
-            Directions.SOUTH,
-            Directions.EAST,
-            Directions.WEST,
-        ]:
-            dx, dy = Actions.directionToVector(direction)
-            nextx, nexty = int(x + dx), int(y + dy)
-
-            if not walls[nextx][nexty]:
-                siguiente = (nextx, nexty)
-                if siguiente == meta:
-                    return distancia + 1
-                if siguiente not in visitados:
-                    visitados.add(siguiente)
-                    frontera.push((siguiente, distancia + 1))
-
-    # No debería ocurrir en un mapa válido y conexo
-    return 999999
+    return distanciaEuclidea(posicion, objetivo)
 
 
-def mazeDistance(punto1, punto2, problem):
+
+
+def mazeDistance(punto1, punto2, problema):
     """
     Devuelve la distancia real de laberinto entre punto1 y punto2, usando
     problem.heuristicInfo como caché. Como K, C y cada T son siempre los
@@ -108,17 +73,17 @@ def mazeDistance(punto1, punto2, problem):
     robot), cachear evita recalcular el mismo par de puntos en cada nodo
     expandido.
     """
-    cache = problem.heuristicInfo.setdefault("mazeDistances", {})
+    cache = problema.heuristicInfo.setdefault("mazeDistances", {})
     clave = (punto1, punto2) if punto1 <= punto2 else (punto2, punto1)
 
     if clave not in cache:
-        cache[clave] = _bfsDistance(punto1, punto2, problem.walls)
+        cache[clave] = _bfsDistance(punto1, punto2, problema.walls)
 
     return cache[clave]
 
 
 def systemRepairHeuristic(
-    state: Tuple[Tuple, bool, Tuple], problem: SystemRepairProblem
+    estado: Tuple[Tuple, bool, Tuple], problema: SystemRepairProblem
 ):
     """
     Your heuristic for the SystemRepairProblem.
@@ -133,17 +98,23 @@ def systemRepairHeuristic(
     - Go with some simple heuristics first, then build up to more complex ones
     - Consider the kit, pending systems, and the final return to control center
     - Balance heuristic strength vs. computation time (do experiments!)
+    
+    
+    # Como podras ver systemRepairHeuristic es casi igual a manhatan, y eso es porque me di cuenta de que 
+    ambas siguen la misma lógica (K, T mas cercano, o C segun la fase),solo cambia la métrica: 
+    manhattanHeuristic usa línea recta, systemRepairHeuristic usa distancia real de laberinto vía BFS.
     """
-    position, hasKit, pendingSystems = state
+    
+    posicion, tieneKit, sistemasPendientes = estado
 
-    if not hasKit:
-        objetivo = problem.kitPosition
-    elif len(pendingSystems) > 0:
+    if not tieneKit:
+        objetivo = problema.kitPosition
+    elif len(sistemasPendientes) > 0:
         objetivo = min(
-            pendingSystems,
-            key=lambda t: mazeDistance(position, t, problem),
+            sistemasPendientes,
+            key=lambda sistema: mazeDistance(posicion, sistema, problema),
         )
     else:
-        objetivo = problem.controlPosition
+        objetivo = problema.controlPosition
 
-    return mazeDistance(position, objetivo, problem)
+    return mazeDistance(posicion, objetivo, problema)
