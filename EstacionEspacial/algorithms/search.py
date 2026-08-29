@@ -64,24 +64,25 @@ def depthFirstSearch(problem: SearchProblem):
         print("sucesores de mi sucesor: ", sucesores_de_mi_sucesor)
     """
         
-    frontera = utils.Stack()
-    visitados = set()
-     
-    frontera.push((problem.getStartState(), []))
-     
-    while not frontera.isEmpty():
-        estado, camino = frontera.pop()
-     
-        if estado not in visitados:
-            if problem.isGoalState(estado):
-                return camino
+    mi_frontera = utils.Stack()
+    nodos_visitados = []  # aqui guardo los estados que ya recorri
 
-            visitados.add(estado)
-            for sucesor, accion, costoPaso in problem.getSuccessors(estado):
-                if sucesor not in visitados:
-                    frontera.push((sucesor, camino + [accion]))
-     
-    return []
+    mi_frontera.push((problem.getStartState(), []))  # aqui empiezo desde el estado inicial
+
+    while not mi_frontera.isEmpty():
+        estado, camino = mi_frontera.pop()  # aqui saco el ultimo que meti
+
+        if problem.isGoalState(estado): 
+            return camino
+
+        if estado not in nodos_visitados:  
+            nodos_visitados.append(estado)  # aqui lo marco como visitado
+            for sucesor, accion, costo_del_camino in problem.getSuccessors(estado):
+                if sucesor not in nodos_visitados:  
+                    mi_frontera.push((sucesor, camino + [accion]))  # aqui lo agrego a la pila
+                    
+
+    return []  # si no encontre nada, devuelvo vacio
 
 
 def breadthFirstSearch(problem: SearchProblem):
@@ -141,8 +142,28 @@ def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """
     Search the node that has the lowest combined cost and heuristic first.
     """
-    # TODO: Add your code here
-    utils.raiseNotDefined()
+    mi_frontera = utils.PriorityQueue()
+    nodos_visitados = set()
+
+    estadoInicial = problem.getStartState()
+    mi_frontera.push((estadoInicial, [], 0), heuristic(estadoInicial, problem))
+
+    while not mi_frontera.isEmpty():
+        estado, camino, costoAcumulado = mi_frontera.pop()
+
+        if problem.isGoalState(estado):
+            return camino
+
+        if estado not in nodos_visitados:
+            nodos_visitados.add(estado)
+            for sucesor, accion, costoPaso in problem.getSuccessors(estado):
+                if sucesor not in nodos_visitados:
+                    nuevoCosto = costoAcumulado + costoPaso
+                    prioridad = nuevoCosto + heuristic(sucesor, problem)
+                    mi_frontera.push((sucesor, camino + [accion], nuevoCosto), prioridad)
+    
+
+    return []
 
 
 # Abbreviations (you can use them for the -f option in main.py)
