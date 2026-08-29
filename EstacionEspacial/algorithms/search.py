@@ -72,10 +72,10 @@ def depthFirstSearch(problem: SearchProblem):
     while not frontera.isEmpty():
         estado, camino = frontera.pop()
      
-        if problem.isGoalState(estado):
-            return camino
-     
         if estado not in visitados:
+            if problem.isGoalState(estado):
+                return camino
+
             visitados.add(estado)
             for sucesor, accion, costoPaso in problem.getSuccessors(estado):
                 if sucesor not in visitados:
