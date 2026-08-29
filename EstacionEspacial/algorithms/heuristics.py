@@ -23,17 +23,17 @@ def manhattanHeuristic(estado, problema):
     - the nearest pending T if the robot has the kit and systems remain.
     - C if all systems have been repaired.
     """
-    posicion, tieneKit, sistemasPendientes = estado
+    posicion, tiene_kit, sistemas_pendientes = estado
 
-    if not tieneKit:
+    if not tiene_kit:
         objetivo = problema.kitPosition
-    elif len(sistemasPendientes) > 0:
+    elif len(sistemas_pendientes) > 0:
         objetivo = min(
-            sistemasPendientes,
+            sistemas_pendientes,
             key=lambda sistema: abs(posicion[0] - sistema[0]) + abs(posicion[1] - sistema[1]),
         )
     else:
-        objetivo = problema.controlPosition
+        objetivo = problema.control_position
 
     return abs(posicion[0] - objetivo[0]) + abs(posicion[1] - objetivo[1])
 
@@ -48,17 +48,17 @@ def euclideanHeuristic(estado, problema):
     - the nearest pending T if the robot has the kit and systems remain.
     - C if all systems have been repaired.
     """
-    posicion, tieneKit, sistemasPendientes = estado
+    posicion, tiene_kit, sistemas_pendientes = estado
 
     def distanciaEuclidea(punto1, punto2):
         return math.sqrt((punto1[0] - punto2[0]) ** 2 + (punto1[1] - punto2[1]) ** 2)
 
-    if not tieneKit:
+    if not tiene_kit:
         objetivo = problema.kitPosition
-    elif len(sistemasPendientes) > 0:
-        objetivo = min(sistemasPendientes, key=lambda sistema: distanciaEuclidea(posicion, sistema))
+    elif len(sistemas_pendientes) > 0:
+        objetivo = min(sistemas_pendientes, key=lambda sistema: distanciaEuclidea(posicion, sistema))
     else:
-        objetivo = problema.controlPosition
+        objetivo = problema.control_position
 
     return distanciaEuclidea(posicion, objetivo)
 
