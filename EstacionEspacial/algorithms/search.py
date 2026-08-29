@@ -20,25 +20,67 @@ def depthFirstSearch(problem: SearchProblem):
 
     Your search algorithm needs to return a list of actions that reaches the
     goal. Make sure to implement a graph search algorithm.
-    """
 
+    To get started, you might want to try some of these simple commands to
+    understand the search problem that is being passed in:
+
+    print("Start:", problem.getStartState())
+    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    """
+    
+    # TODO: Add your code here
+    
+    print("Start:", problem.getStartState())
+    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    
+    
+    """
+    nodos_por_expandir = problem.getSuccessors(problem.getStartState())
+    nodos_visitados = []
+    for i in range (10):
+        
+        if (nodo_expandido in nodos_visitados):
+            nodos_visitados.append(nodo_expandido)
+            nodos_por_expandir.delete(tamano_cola-1)
+            tamano_cola = len(nodos_por_expandir)
+            nodo_expandido = nodos_por_expandir[tamano_cola-1]
+            
+        else:
+            nodo_expandido = nodos_por_expandir[tamano_cola-1]
+        
+        print("Mi nodo a expandir: ", nodo_expandido)
+        
+        
+        estado_de_mi_sucesor_a_expandir1 = nodo_expandido[0]
+        print("Estado / coordendas de mi sucesor a expandir {i}: ", estado_de_mi_sucesor_a_expandir1)
+        print ("Este sucesor es la meta? ", problem.isGoalState(estado_de_mi_sucesor_a_expandir1))
+            
+        sucesores_de_mi_sucesor = problem.getSuccessors(estado_de_mi_sucesor_a_expandir1)
+        for j in range (len(sucesores_de_mi_sucesor)):
+            nodos_por_expandir.append(sucesores_de_mi_sucesor[j])
+            
+        print("sucesores de mi sucesor: ", sucesores_de_mi_sucesor)
+    """
+        
     frontera = utils.Stack()
     visitados = set()
-
+     
     frontera.push((problem.getStartState(), []))
-
+     
     while not frontera.isEmpty():
         estado, camino = frontera.pop()
-
+     
         if problem.isGoalState(estado):
             return camino
-
+     
         if estado not in visitados:
             visitados.add(estado)
-            for sucesor, accion, _ in problem.getSuccessors(estado):
+            for sucesor, accion, costoPaso in problem.getSuccessors(estado):
                 if sucesor not in visitados:
                     frontera.push((sucesor, camino + [accion]))
-
+     
     return []
 
 
